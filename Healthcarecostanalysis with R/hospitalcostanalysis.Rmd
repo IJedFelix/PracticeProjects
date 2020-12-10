@@ -1,0 +1,226 @@
+---
+title: "Hospital cost analysis"
+output: pdf_document
+---
+
+
+DESCRIPTION
+
+Background and Objective:
+
+A nationwide survey of hospital costs conducted by the US Agency for Healthcare consists of hospital records of inpatient samples.
+The given data is restricted to the city of Wisconsin and relates to patients in the age group 0-17 years.
+The agency wants to analyze the data to research on healthcare costs and their utilization.
+
+Domain: Healthcare
+
+Dataset Description:
+
+
+Attribute	     Description
+Age 	         Age of the patient discharged
+Female 	       A binary variable that indicates if the patient is female
+Los	           Length of stay in days
+Race 	         Race of the patient (specified numerically)
+Totchg	       Hospital discharge costs
+Aprdrg         All Patient Refined Diagnosis Related Groups
+
+```{r}
+# Loading all the packages required.
+
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+# Importing the dataset
+
+setwd("C:/DataScience/Rprojects/Hospitalanalysis")
+getwd()
+hospitaldata<-read_xlsx("hospitalcosts.xlsx")
+View(hospitaldata)
+
+
+# Q1)To record the patient statistics, the agency wants to find the age 
+# category of people who frequent the hospital and has the maximum expenditure.
+
+
+agecount<-hospitaldata %>% count(AGE)
+View(agecount)
+
+ageg<-ggplot(hospitaldata)+ geom_bar(aes(x = AGE), fill="red")
+ageg
+
+
+# we see that most frequent age of discharge is 0 with a count of 307
+# (61.4% in the given data set) . So we can say babies under age 1
+# that is babies of age 0 are more frequent to the hospital.
+
+ageexp<-hospitaldata %>% count(AGE, wt= TOTCHG)
+View(ageexp)
+
+
+# Maximum expenditure is of Patients of age 0, this might be because 61.4% of
+# the dataset are age 0 patient, so we can take average expenditure of each age
+# to find the age with maximum average expenditure.
+
+summ<-summarise(group_by(hospitaldata,AGE),mean(TOTCHG))
+View(summ)
+
+plot(summ,col="red",bg="red")
+
+#maximum average expenditure is from the patients of age 9.
+
+# Answer 1
+
+# ->From the data set we conclude Age 0 is more frequent with
+# 61.4% of all the patients. 
+# ->Patients with Maximum expenditure is age 0
+# also to note maximum average expenditure belongs to patient of age 9.
+
+
+```
+
+
+```{r}
+# Q2)In order of severity of the diagnosis and treatments and to find out
+# the expensive treatments, the agency wants to find the diagnosis-related group
+# that has maximum hospitalization and expenditure.
+
+
+drgcount<-hospitaldata %>% count(APRDRG)
+View(drgcount)
+
+# The DRG which has maximum hospitalization is
+# 640 (Hemorrhage in early pregnancy) with 267 patients.
+
+drgavgexp<-summarise(group_by(hospitaldata,APRDRG),mean(TOTCHG))
+View(drgavgexp)
+drgsumexp<-summarise(group_by(hospitaldata,APRDRG),sum(TOTCHG))
+View(drgsumexp)
+
+# so we see the maximum average expenditure is DRG 911 with an average of 48388
+# and the maximum sum of expenditure is for the DRG 640,
+# this is  because DRG 640 is 53.4% of all the DRGs in the given dataset.
+
+
+# Answer 2
+
+# From the data set we conclude that the DRG which has maximum hospitalization
+# is 640, 53.4% of the total patients. DRG 640 contributes to the
+# maximum expenditure and we can also note the
+# maximum average expenditure is for DRG 911.
+```
+
+
+
+```{r}
+# Q3)To make sure that there is no malpractice, the agency needs to analyze
+# if the race of the patient is related to the hospitalization costs.
+
+
+
+racec<-hospitaldata%>% count(RACE)
+View(racec)
+raceexp<-summarise(group_by(hospitaldata,RACE),mean(TOTCHG))
+View(raceexp)
+
+# In the given dataset the most frequent patients belong to race 1 and
+# the maximum average expenditure is of race 2. With this data we can not say
+# Race of a patient affects the cost as other factors might have
+# effected the cost.
+
+
+
+
+racexplm<-lm(data=hospitaldata, formula = TOTCHG~RACE)
+summary(racexplm)
+
+# By doing the linear regression we can say that TOTCHG (Hospitalization cost)
+# in not dependent on the race of the patient for the given data set.
+
+#Answer 3
+
+# -> It seemed like the cost was affected by race of the patient. But by doing
+# the linear regression we see that the p value is greater than 0.05 hence race
+# of a patient does not affect the cost.
+```
+
+
+```{r}
+# Q4)To properly utilize the costs, the agency has to analyze the
+# severity of the hospital costs by age and gender for the proper allocation
+# of resources.
+
+
+
+selection<-select(hospitaldata,AGE,FEMALE,TOTCHG)
+View(selection)
+t<-summarise(group_by(selection,AGE,FEMALE),mean(TOTCHG))
+View(t)
+
+
+facfemale<-factor(selection$FEMALE)
+ggplot(hospitaldata, aes(fill=facfemale, y=TOTCHG, x=AGE)) + 
+    geom_bar(position="dodge", stat="identity")
+
+# By looking at the grouped bar chart we can say for the age 0,5,12,13,17
+# females have higher expenditure than males of those age.
+
+hostag<-lm(hospitaldata, formula= TOTCHG~ AGE+ FEMALE)
+summary(hostag)
+hostag$coefficients
+
+#Answer 4
+
+# ->From the bar chart we can say that Females of ages 0,5,12,13,17 have higher
+# expenditure than males of those age.
+
+
+# ->From the linear regression we can conclude that AGE is affecting the
+# cost more than GENDER.We get the equation
+# y = 2718.62816 + 86.28231*AGE - 748.18748*FEMALE.
+
+
+
+```
+
+
+```{r}
+# Q5) Since the length of stay is the crucial factor for inpatients,
+# the agency wants to find if the length of stay can be predicted
+# from age, gender, and race.
+
+length<-lm(hospitaldata, formula = LOS~ AGE + FEMALE + RACE)
+summary(length)
+
+
+# Answer 5
+
+# -> We can see that the p value is high for all three variables which implies
+# the linear relationship  is not established between dependent variable
+# LOS and Independent variable (AGE,GENDER,RACE). Hence LOS is not predictable
+# using AGE, FEMALE, RACE from the given data.
+ 
+
+```
+
+
+```{r}
+
+#  Q6) To perform a complete analysis, the agency wants to find the variable
+# that mainly affects hospital costs.
+
+cost<-lm(hospitaldata, formula = TOTCHG ~ APRDRG +AGE +FEMALE +LOS +RACE)
+summary(cost)
+
+# Answer 6
+
+# -> by looking at the p value for each of the category we can remove
+# gender and race as their p value is high, meaning they do not affect Cost
+# in the given data set. 
+# -> Hence we can consider Length Of Stay ,AGE and APRDRG which impacts
+# the cost.
+
+
+```
+
