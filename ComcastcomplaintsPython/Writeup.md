@@ -6,6 +6,8 @@ They continue to fall short despite repeated promises to improve. Only last mont
 consumer complaints. The existing database will serve as a repository of public customer complaints filed against Comcast.
 It will help to pin down what is wrong with Comcast's customer service.
 
+Insights
+
 - Most complaints were received in June (1046).
  - Most complaints are received from Georgia (288).
      - out of 288, 208 are solved and 80 are still open
