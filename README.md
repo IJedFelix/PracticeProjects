@@ -1,4 +1,4 @@
 # Simplilearn course end projects
-Due to some issues in Github Python notebooks are not loading properly, please click on reload multiple times then it loads.
+Due to some issues in Github sometimes python notebooks are not loading properly, please click on reload then it loads.
 
-These projects are done as part of my courses on Simplilearn.
+These projects are done as part of my Data Science course on Simplilearn.
